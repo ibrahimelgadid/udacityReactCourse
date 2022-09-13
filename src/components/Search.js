@@ -9,24 +9,28 @@ const Search = () => {
   const [searchedBooks, setsearchedBooks] = useState([]);
   const [searchWord, setsearchWord] = useState("");
 
-  useEffect(() => {
-    if (searchWord !== "") {
-      (async () => {
-        let searchRes = await search(searchWord.trim());
-        let shelfedBooks = await getAll();
-        // shelfedBooks = shelfedBooks.map((s) => s.id);
+  const handleSearchWord = async () => {
+    if (searchWord.length > 0) {
+      let searchRes = await search(searchWord.trim());
+      let shelfedBooks = await getAll();
 
-        if (!searchRes.error) {
-          searchRes.forEach((sr) => {
-            let sb = shelfedBooks.filter((sb) => sb.id === sr.id);
-            sr.shelf = sb.length ? sb[0].shelf : "none";
-            setsearchedBooks(searchRes);
-          });
-        } else {
-          setsearchedBooks([]);
-        }
-      })();
+      if (!searchRes.error) {
+        searchRes.forEach((sr) => {
+          let sb = shelfedBooks.filter((sb) => sb.id === sr.id);
+          sr.shelf = sb.length ? sb[0].shelf : "none";
+          setsearchedBooks(searchRes);
+        });
+      } else {
+        setsearchedBooks([]);
+      }
+    } else if (searchWord.length === 0) {
+      setsearchedBooks([]);
     }
+  };
+
+  useEffect(() => {
+    handleSearchWord();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchWord]);
 
   return (
