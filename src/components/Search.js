@@ -12,18 +12,22 @@ const Search = () => {
   useEffect(() => {
     if (searchWord !== "") {
       (async () => {
-        let searchRes = await search(searchWord.toLocaleLowerCase(), 50);
-        console.log(searchRes);
-        searchRes.error ? setsearchedBooks([]) : setsearchedBooks(searchRes);
+        let searchRes = await search(searchWord.trim());
+        let shelfedBooks = await getAll();
+        // shelfedBooks = shelfedBooks.map((s) => s.id);
+
+        if (!searchRes.error) {
+          searchRes.forEach((sr) => {
+            let sb = shelfedBooks.filter((sb) => sb.id === sr.id);
+            sr.shelf = sb.length ? sb[0].shelf : "none";
+            setsearchedBooks(searchRes);
+          });
+        } else {
+          setsearchedBooks([]);
+        }
       })();
     }
   }, [searchWord]);
-  useEffect(() => {
-    (async () => {
-      let searchRes = await getAll();
-      console.log(searchRes);
-    })();
-  }, []);
 
   return (
     <>
@@ -37,7 +41,9 @@ const Search = () => {
               type="text"
               value={searchWord}
               placeholder="Search by title, author, or ISBN"
-              onChange={(e) => setsearchWord(e.target.value)}
+              onChange={(e) => {
+                setsearchWord(e.target.value);
+              }}
             />
           </div>
         </div>
